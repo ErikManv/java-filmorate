@@ -63,9 +63,9 @@ public class FilmController {
             log.error("слишком большое описание");
             throw new ValidationException("Длинна описания более 200 символов");
         }
-        if(film.getReleaseDate().isBefore(LocalDate.of(1968, 12, 28))) {
+        if(film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.error("неверная дата");
-            throw new ValidationException("Не раньше 1968-12-28");
+            throw new ValidationException("Не раньше 1895-12-28");
         }
         if(film.getDuration() < 0) {
             log.error("отрицательное число");
@@ -76,7 +76,7 @@ public class FilmController {
             films.put(film.getId(), film);
         }else{
             log.error("NOT SUCH FILM TO UPDATE");
-            System.out.println("NOT SUCH FILM TO UPDATE");
+            throw new ValidationException("такого id нет");
         }
         return film;
     }

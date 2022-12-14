@@ -52,10 +52,26 @@ public class UserController {
     @PutMapping(value="/users")
     public void updateUser(@RequestBody User user){
         if(users.containsKey(user.getId())){
+            if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
+                log.error("неверный email");
+                throw new ValidationException("неверный email");
+            }
+            if(user.getLogin().isEmpty() || user.getLogin().contains(" ")){
+                log.error("неверный логин");
+                throw new ValidationException("логин не может быть пустым и содержать пробелы");
+            }
+            if(user.getBirthday().isAfter(LocalDate.now())){
+                log.error("неверная дата рождения");
+                throw new ValidationException("неверная дата рождения");
+            }
+            if(user.getName().isEmpty()){
+                user.setName(user.getLogin());
+            }
             log.info("пользователь {} обновлен", user.getName());
             users.put(user.getId(), user);
         }else{
-            System.out.println("NOT SUCH USER TO UPDATE");
+            log.error("NOT SUCH id TO UPDATE");
+            throw new ValidationException("такого id нет");
         }
     }
 
