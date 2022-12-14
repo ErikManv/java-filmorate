@@ -25,7 +25,7 @@ public class UserController {
         return users;
     }
 
-    @PostMapping(value="/user")
+    @PostMapping(value="/users")
     public User createUser(@RequestBody User user){
         if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
             log.error("неверный email");
@@ -49,7 +49,7 @@ public class UserController {
         return user;
     }
 
-    @PutMapping(value="/userUpdate")
+    @PutMapping(value="/users")
     public void updateUser(@RequestBody User user){
         if(users.containsKey(user.getId())){
             log.info("пользователь {} обновлен", user.getName());

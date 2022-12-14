@@ -27,7 +27,7 @@ public class FilmController {
         return films;
     }
 
-    @PostMapping(value="/film")
+    @PostMapping(value="/films")
     public Film addFilm(@RequestBody Film film){
         if(film.getName().isBlank()) {
             log.error("пустое имя");
@@ -53,7 +53,7 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping(value="/filmUpdate")
+    @PutMapping(value="/films")
     public Film updateFilm(@RequestBody Film film){
         if(film.getName().isBlank()) {
             log.error("пустое имя");
