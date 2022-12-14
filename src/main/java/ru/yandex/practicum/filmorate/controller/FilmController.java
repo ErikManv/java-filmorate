@@ -6,11 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,18 +17,18 @@ public class FilmController {
         filmId++;
     }
 
-    private Map <String, Film> films = new HashMap<>();
+    private Map <Integer, Film> films = new HashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
 
     @GetMapping("/films")
-    public Map<String, Film> findAll(){
+    public Map<Integer, Film> findAll(){
         return films;
     }
 
     @PostMapping(value="/film")
-    public void addFilm(@RequestBody Film film){
+    public Film addFilm(@RequestBody Film film){
         if(film.getName().isBlank()) {
             log.error("пустое имя");
             throw new ValidationException("Имя не может быть пустым");
@@ -51,12 +48,13 @@ public class FilmController {
 
         log.info("фильм {} добавлен", film.getName());
         countId();
-        film.setId(Integer.toString(filmId));
+        film.setId(filmId);
         films.put(film.getId(), film);
+        return film;
     }
 
     @PutMapping(value="/filmUpdate")
-    public void updateFilm(@RequestBody Film film){
+    public Film updateFilm(@RequestBody Film film){
         if(film.getName().isBlank()) {
             log.error("пустое имя");
             throw new ValidationException("Имя не может быть пустым");
@@ -77,7 +75,9 @@ public class FilmController {
             log.info("фильм {} обновлен", film.getName());
             films.put(film.getId(), film);
         }else{
+            log.error("NOT SUCH FILM TO UPDATE");
             System.out.println("NOT SUCH FILM TO UPDATE");
         }
+        return film;
     }
 }
