@@ -37,9 +37,9 @@ public class FilmController {
             log.error("слишком большое описание");
             throw new ValidationException("Длинна описания более 200 символов");
         }
-        if(film.getReleaseDate().isBefore(LocalDate.of(1968, 12, 28))) {
+        if(film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.error("неверная дата");
-            throw new ValidationException("Не раньше 1968-12-28");
+            throw new ValidationException("Не раньше 1895-12-28");
         }
         if(film.getDuration() < 0) {
             log.error("отрицательное число");

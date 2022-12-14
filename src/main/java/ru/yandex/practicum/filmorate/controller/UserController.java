@@ -51,6 +51,7 @@ public class UserController {
 
     @PutMapping(value="/users")
     public void updateUser(@RequestBody User user){
+        System.out.println(user.getId());
         if(users.containsKey(user.getId())){
             if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
                 log.error("неверный email");
