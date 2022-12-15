@@ -7,7 +7,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 public class UserController {
@@ -21,8 +23,8 @@ public class UserController {
     private HashMap<Integer, User> users = new HashMap<>();
 
     @GetMapping("/users")
-    public HashMap<Integer, User> findAll(){
-        return users;
+    public List<User> findAll(){
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping(value="/users")
