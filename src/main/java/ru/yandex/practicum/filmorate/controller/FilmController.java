@@ -7,7 +7,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,8 +25,8 @@ public class FilmController {
 
 
     @GetMapping("/films")
-    public Map<Integer, Film> findAll(){
-        return films;
+    public List<Film> findAll(){
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping(value="/films")

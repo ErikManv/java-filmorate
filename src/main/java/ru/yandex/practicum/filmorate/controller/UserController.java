@@ -42,6 +42,9 @@ public class UserController {
             throw new ValidationException("неверная дата рождения");
         }
         log.info("пользователь {} добавлен", user.getName());
+        if(user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         countId();
         user.setId(userId);
         users.put(user.getId(), user);
