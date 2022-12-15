@@ -47,8 +47,7 @@ public class UserController {
     }
 
     @PutMapping(value="/users")
-    public void updateUser(@RequestBody User user){
-        if(users.containsKey(user.getId())){
+    public User updateUser(@RequestBody User user){
             if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
                 log.error("неверный email");
                 throw new ValidationException("неверный email");
@@ -61,12 +60,13 @@ public class UserController {
                 log.error("неверная дата рождения");
                 throw new ValidationException("неверная дата рождения");
             }
+        if(users.containsKey(user.getId())){
             log.info("пользователь {} обновлен", user.getName());
             users.put(user.getId(), user);
         }else{
             log.error("NOT SUCH id TO UPDATE");
             throw new ValidationException("такого id нет");
         }
+        return user;
     }
-
 }
