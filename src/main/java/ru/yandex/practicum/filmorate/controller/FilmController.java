@@ -31,23 +31,7 @@ public class FilmController {
 
     @PostMapping(value="/films")
     public Film addFilm(@RequestBody Film film){
-        if(film.getName().isBlank()) {
-            log.error("пустое имя");
-            throw new ValidationException("Имя не может быть пустым");
-        }
-        if(film.getDescription().length() > 200) {
-            log.error("слишком большое описание");
-            throw new ValidationException("Длинна описания более 200 символов");
-        }
-        if(film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("неверная дата");
-            throw new ValidationException("Не раньше 1895-12-28");
-        }
-        if(film.getDuration() < 0) {
-            log.error("отрицательное число");
-            throw new ValidationException("Длительность должна быть положительной");
-        }
-
+        validator(film);
         log.info("фильм {} добавлен", film.getName());
         countId();
         film.setId(filmId);
@@ -57,6 +41,18 @@ public class FilmController {
 
     @PutMapping(value="/films")
     public Film updateFilm(@RequestBody Film film){
+        validator(film);
+        if(films.containsKey(film.getId())){
+            log.info("фильм {} обновлен", film.getName());
+            films.put(film.getId(), film);
+        }else{
+            log.error("NOT SUCH FILM TO UPDATE");
+            throw new ValidationException("такого id нет");
+        }
+        return film;
+    }
+
+    private void validator(Film film){
         if(film.getName().isBlank()) {
             log.error("пустое имя");
             throw new ValidationException("Имя не может быть пустым");
@@ -73,13 +69,5 @@ public class FilmController {
             log.error("отрицательное число");
             throw new ValidationException("Длительность должна быть положительной");
         }
-        if(films.containsKey(film.getId())){
-            log.info("фильм {} обновлен", film.getName());
-            films.put(film.getId(), film);
-        }else{
-            log.error("NOT SUCH FILM TO UPDATE");
-            throw new ValidationException("такого id нет");
-        }
-        return film;
     }
 }

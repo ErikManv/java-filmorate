@@ -29,18 +29,7 @@ public class UserController {
 
     @PostMapping(value="/users")
     public User createUser(@RequestBody User user){
-        if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
-            log.error("неверный email");
-            throw new ValidationException("неверный email");
-        }
-        if(user.getLogin().isEmpty() || user.getLogin().contains(" ")){
-            log.error("неверный логин");
-            throw new ValidationException("логин не может быть пустым и содержать пробелы");
-        }
-        if(user.getBirthday().isAfter(LocalDate.now())){
-            log.error("неверная дата рождения");
-            throw new ValidationException("неверная дата рождения");
-        }
+        validator(user);
         log.info("пользователь {} добавлен", user.getName());
         if(user.getName() == null) {
             user.setName(user.getLogin());
@@ -53,18 +42,7 @@ public class UserController {
 
     @PutMapping(value="/users")
     public User updateUser(@RequestBody User user){
-            if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
-                log.error("неверный email");
-                throw new ValidationException("неверный email");
-            }
-            if(user.getLogin().isEmpty() || user.getLogin().contains(" ")){
-                log.error("неверный логин");
-                throw new ValidationException("логин не может быть пустым и содержать пробелы");
-            }
-            if(user.getBirthday().isAfter(LocalDate.now())){
-                log.error("неверная дата рождения");
-                throw new ValidationException("неверная дата рождения");
-            }
+        validator(user);
         if(users.containsKey(user.getId())){
             log.info("пользователь {} обновлен", user.getName());
             users.put(user.getId(), user);
@@ -73,5 +51,20 @@ public class UserController {
             throw new ValidationException("такого id нет");
         }
         return user;
+    }
+
+    private void validator(User user) {
+        if(user.getEmail().isEmpty() || !user.getEmail().contains("@")){
+            log.error("неверный email");
+            throw new ValidationException("неверный email");
+        }
+        if(user.getLogin().isEmpty() || user.getLogin().contains(" ")){
+            log.error("неверный логин");
+            throw new ValidationException("логин не может быть пустым и содержать пробелы");
+        }
+        if(user.getBirthday().isAfter(LocalDate.now())){
+            log.error("неверная дата рождения");
+            throw new ValidationException("неверная дата рождения");
+        }
     }
 }
