@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    int filmId = 0;
+    Integer filmId = 0;
     private void countId() {
         filmId++;
     }
@@ -33,8 +33,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public boolean containsFilm(int filmId) {
+    public boolean containsFilm(Integer filmId) {
         return films.containsKey(filmId);
+    }
+
+    @Override
+    public Film getFilm(Integer filmId) {
+        return films.get(filmId);
     }
 
     @Override
@@ -43,21 +48,22 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    
     @Override
-    public void putLike(int filmId, int userId){
+    public void putLike(Integer filmId, Integer userId){
         films.get(filmId).getPersonsLikedFilm().add(userId);
     }
 
     @Override
-    public void deleteLike(int filmId, int userId) {
+    public void deleteLike(Integer filmId, Integer userId) {
         films.get(filmId).getPersonsLikedFilm().remove(userId);
     }
 
     @Override
-    public List<Film> topFilms(int count){
+    public List<Film> topFilms(Integer count){
        return findAll()
                .stream()
-               .sorted(Comparator.comparing(o->o.getPersonsLikedFilm().size()))
+               .sorted(Comparator.comparing(o->o.getPersonsLikedFilm().size(), Comparator.reverseOrder()))
                .limit(count)
                .collect(Collectors.toList());
     }

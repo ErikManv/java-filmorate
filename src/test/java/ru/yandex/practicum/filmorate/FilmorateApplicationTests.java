@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class FilmorateApplicationTests {
-	FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
+	FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
 	UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
 	@Test
 	void validationFilmNameExcepTest() {

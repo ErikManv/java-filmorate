@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    int userId = 0;
+    Integer userId = 0;
     private void countId() {
         userId++;
     }
@@ -25,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user){
-        if(user.getName() == null) {
+        if(user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         countId();
@@ -35,7 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean containsUser(int userId) {
+    public boolean containsUser(Integer userId) {
         return users.containsKey(userId);
     }
 
@@ -46,12 +46,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(int userId){
+    public User getUser(Integer userId){
         return users.get(userId);
     }
 
     @Override
-    public List<User> getFriendsList(int userId){
+    public List<User> getFriendsList(Integer userId){
         List<Integer> frinedsId = new ArrayList<>(this.getUser(userId).getFriendsList());
         List<User> friends = new ArrayList<>();
         for(Integer friendId: frinedsId){
@@ -60,22 +60,22 @@ public class InMemoryUserStorage implements UserStorage {
         return friends;
     }
     @Override
-    public void putFriend(int userId, int newFriendId) {
+    public void putFriend(Integer userId, Integer newFriendId) {
         users.get(userId).getFriendsList().add(newFriendId);
         users.get(newFriendId).getFriendsList().add(userId);
     }
 
     @Override
-    public void deleteFriend(int userId, int targetFriendId) {
+    public void deleteFriend(Integer userId, Integer targetFriendId) {
         users.get(userId).getFriendsList().remove(targetFriendId);
     }
 
     @Override
-    public List<User> commonFriends(int fUserId, int sUserId) {
+    public List<User> commonFriends(Integer fUserId, Integer sUserId) {
         Set<Integer> firstUserFriends = users.get(fUserId).getFriendsList();
         Set<Integer> secondUserFriends = users.get(sUserId).getFriendsList();
         List<User> commonFriends = new ArrayList<>();
-        for(int friendId: firstUserFriends){
+        for(Integer friendId: firstUserFriends){
             if(secondUserFriends.contains(friendId)) {
                 commonFriends.add(users.get(friendId));
             }

@@ -35,12 +35,24 @@ public class UserService {
         return user;
     }
 
-    public User getUser(int userId) {
-        return userStorage.getUser(userId);
+    public User getUser(Integer userId) {
+        idValidator(userId);
+        if(userStorage.containsUser(userId)){
+            return userStorage.getUser(userId);
+        }else{
+            log.error("такого id не существует");
+            throw new NullPointerException("такого id нет");
+        }
     }
 
-    public List<User> getFriendsList(int userId) {
-        return userStorage.getFriendsList(userId);
+    public List<User> getFriendsList(Integer userId) {
+        idValidator(userId);
+        if(userStorage.containsUser(userId)){
+            return userStorage.getFriendsList(userId);
+        }else{
+            log.error("такого id не существует");
+            throw new NullPointerException("такого id нет");
+        }
     }
 
     public User updateUser(User user){
@@ -50,21 +62,39 @@ public class UserService {
             userStorage.updateUser(user);
         }else{
             log.error("такого id не существует");
-            throw new ValidationException("такого id нет");
+            throw new NullPointerException("такого id нет");
         }
         return user;
     }
 
-    public void putFriend(int userId, int newFriendId) {
-        userStorage.putFriend(userId, newFriendId);
+    public void putFriend(Integer userId, Integer newFriendId) {
+        idValidator(userId);
+        idValidator(newFriendId);
+        if(userStorage.containsUser(userId) && userStorage.containsUser(newFriendId)) {
+            userStorage.putFriend(userId, newFriendId);
+        }else {
+            throw new NullPointerException("Пользователя с таким id нет");
+        }
     }
 
-    public void deleteFriend(int userId, int targetFriendId) {
-        userStorage.deleteFriend(userId, targetFriendId);
+    public void deleteFriend(Integer userId, Integer targetFriendId) {
+        idValidator(userId);
+        idValidator(targetFriendId);
+        if(userStorage.containsUser(userId) && userStorage.containsUser(targetFriendId)) {
+            userStorage.deleteFriend(userId, targetFriendId);
+        }else {
+            throw new NullPointerException("Пользователя с таким id нет");
+        }
     }
 
-    public List<User> commonFriends(int fUserId, int sUserId) {
-        return userStorage.commonFriends(fUserId, sUserId);
+    public List<User> commonFriends(Integer fUserId, Integer sUserId) {
+        idValidator(fUserId);
+        idValidator(sUserId);
+        if(userStorage.containsUser(fUserId) && userStorage.containsUser(sUserId)) {
+            return userStorage.commonFriends(fUserId, sUserId);
+        }else {
+            throw new NullPointerException("Пользователя с таким id нет");
+        }
     }
 
     private void validator(User user) {
@@ -79,6 +109,13 @@ public class UserService {
         if(user.getBirthday().isAfter(LocalDate.now())){
             log.error("неверная дата рождения");
             throw new ValidationException("неверная дата рождения");
+        }
+    }
+
+    private void idValidator(Integer id) {
+        if(id < 1) {
+            log.error("неверный id");
+            throw new NullPointerException("id не может быть пустым или отрицательным");
         }
     }
 }

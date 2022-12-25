@@ -11,17 +11,17 @@ public interface UserStorage {
 
     User createUser(User user);
 
-    boolean containsUser(int userId);
+    boolean containsUser(Integer userId);
 
     User updateUser(User user);
 
-    User getUser(int userId);
+    User getUser(Integer userId);
+    
+    List<User> getFriendsList(Integer userId);
 
-    List<User> getFriendsList(int userId);
+    void putFriend(Integer userId, Integer newFriendId);
 
-    void putFriend(int userId, int newFriendId);
+    void deleteFriend(Integer userId, Integer newFriendId);
 
-    void deleteFriend(int userId, int newFriendId);
-
-    List<User> commonFriends(int fUserId, int sUserId);
+    List<User> commonFriends(Integer fUserId, Integer sUserId);
 }

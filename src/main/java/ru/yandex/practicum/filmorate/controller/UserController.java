@@ -2,7 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ErrorResponse;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -32,28 +35,57 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    @GetMapping("/{userId}")
-    public User getUsers(@PathVariable int userId) {
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable("id") Integer userId) {
         return userService.getUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void putFriend(@PathVariable int userId, @PathVariable int newFriendId) {
+    public void putFriend(@PathVariable("id") Integer userId, @PathVariable("friendId") Integer newFriendId) {
         userService.putFriend(userId, newFriendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable int userId, @PathVariable int targetFriendId) {
+    public void deleteFriend(@PathVariable("id") Integer userId, @PathVariable("friendId") Integer targetFriendId) {
         userService.deleteFriend(userId, targetFriendId);
     }
 
-    @GetMapping("/{fUserId}/friends/common/{sUserId}")
-    public List<User> commonFriends(@PathVariable int fUserId, @PathVariable int sUserId) {
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> commonFriends(@PathVariable("id") Integer fUserId, @PathVariable("otherId") Integer sUserId) {
         return userService.commonFriends(fUserId, sUserId);
     }
 
-    @GetMapping("/{userId}/friends")
-    public List<User> getFriends(@PathVariable int userId) {
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable("id") Integer userId) {
         return userService.getFriendsList(userId);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+// отлавливаем исключение IllegalArgumentException
+    public ErrorResponse handleNullPointer(final NullPointerException e) {
+        // возвращаем сообщение об ошибке
+        return new ErrorResponse(
+                "Объект не найден", e.getMessage()
+        );
+    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+// отлавливаем исключение IllegalArgumentException
+    public ErrorResponse handleValidation(final ValidationException e) {
+        // возвращаем сообщение об ошибке
+        return new ErrorResponse(
+                "Ошибка валидации", e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+// отлавливаем исключение IllegalArgumentException
+    public ErrorResponse handleThrowable(final Throwable e) {
+        // возвращаем сообщение об ошибке
+        return new ErrorResponse(
+                "Произошла непредвиденная ошибка", e.getMessage()
+        );
     }
 }
