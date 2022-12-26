@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    Integer filmId = 0;
+    private Integer filmId = 0;
     private void countId() {
         filmId++;
     }

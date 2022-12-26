@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class FilmorateApplicationTests {
-	FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
-	UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
+	private FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
+	private UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
 	@Test
 	void validationFilmNameExcepTest() {
 		Film film = new Film("", "disc", LocalDate.of(1999,12,12), 0);

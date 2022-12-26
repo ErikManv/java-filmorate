@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    Integer userId = 0;
+    private Integer userId = 0;
     private void countId() {
         userId++;
     }
