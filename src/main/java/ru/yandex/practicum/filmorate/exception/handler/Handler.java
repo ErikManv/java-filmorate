@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.yandex.practicum.filmorate.exception.ErrorResponse;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
+import javax.servlet.ServletException;
+
 
 @ControllerAdvice
 public class Handler {
@@ -40,4 +42,13 @@ public class Handler {
         );
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+// отлавливаем исключение IllegalArgumentException
+    public ErrorResponse handleNullPointer(final ServletException e) {
+        // возвращаем сообщение об ошибке
+        return new ErrorResponse(
+                "Объект не найден", e.getMessage()
+        );
+    }
 }

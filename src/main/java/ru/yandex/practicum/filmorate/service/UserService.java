@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -18,17 +19,21 @@ public class UserService {
     private UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     public List<User> findAll(){
+        System.out.println(userStorage.findAll());
         return userStorage.findAll();
     }
 
     public User createUser(User user){
+        if(user.getName().isEmpty() || user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         validator(user);
         log.info("пользователь {} добавлен", user.getName());
         userStorage.createUser(user);
