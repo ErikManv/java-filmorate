@@ -88,7 +88,7 @@ public class FilmDbStorage implements FilmStorage {
         Integer filmId = keyHolder.getKey().intValue();
         film.setId(filmId);
 
-        if(film.getGenres() != null) {
+        if (film.getGenres() != null) {
             for (Genre genre : film.getGenres())
                 jdbcTemplate.update(SQL_ADD_GENRES_OF_FILM, filmId, genre.getId());
         }
@@ -113,8 +113,6 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> listOfFilms = new ArrayList<>();
 
         for (Map<String, Object> map : films) {
-            System.out.println(map.keySet());
-            System.out.println(map.values());
             Film film = new Film();
             film.setId((Integer) map.get("ID"));
             film.setName((String) map.get("NAME"));
@@ -140,7 +138,6 @@ public class FilmDbStorage implements FilmStorage {
                 Genre genre = new Genre(genreId, genreName);
                 film.getGenres().add(genre);
             }
-
             listOfFilms.add(film);
         }
         return listOfFilms;
@@ -150,11 +147,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(Integer id) {
 
         List<Map<String, Object>> films = jdbcTemplate.queryForList(SQL_GET_FILM, id);
-
         List<Map<String, Object>> genresOfFilm = jdbcTemplate.queryForList(SQL_GET_GENRES_OF_FILM, id);
-
         return mapsToList(films, genresOfFilm).get(0);
-
     }
 
     @Override
@@ -176,42 +170,6 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
         return film;
-    }
-
-    private List<Film> mapsToList (List<Map<String, Object>> films, List<Map<String, Object>> genresOfFilm) {    /*convert maps of films and genres
-                                                                                                                 to list of films*/
-        List<Film> listOfFilms = new ArrayList<>();
-
-        for (Map<String, Object> map : films) {
-            System.out.println(map.keySet());
-            System.out.println(map.values());
-            Film film = new Film();
-            film.setId((Integer) map.get("ID"));
-            film.setName((String) map.get("NAME"));
-            film.setDescription((String) map.get("DESCRIPTION"));
-            film.setReleaseDateFromString((String) map.get("RELEASE_DATE"));
-            if (map.containsKey("MPA_NAME")) {
-                film.getMpa().setName((String) map.get("MPA_NAME"));
-            }
-            if (map.containsKey("MPA_ID")) {
-                film.getMpa().setId((Integer) map.get("MPA_ID"));
-            }
-            film.setDuration((Long) map.get("DURATION"));
-            film.setRate((Integer) map.get("RATE"));
-
-            for (Map<String, Object> genreMap : genresOfFilm) {
-                System.out.println(genreMap.keySet());
-                System.out.println(genreMap.values());
-
-                int genreId = (Integer) genreMap.get("ID");
-                String genreName = (String) genreMap.get("NAME");
-                Genre genre = new Genre(genreId, genreName);
-                film.getGenres().add(genre);
-            }
-            listOfFilms.add(film);
-        }
-        return listOfFilms;
-
     }
 
     @Override
@@ -260,7 +218,6 @@ public class FilmDbStorage implements FilmStorage {
                 Genre genre = new Genre(genreId, genreName);
                 film.getGenres().add(genre);
             }
-
             listOfFilms.add(film);
         }
 
@@ -269,5 +226,35 @@ public class FilmDbStorage implements FilmStorage {
                 .stream()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    private List<Film> mapsToList (List<Map<String, Object>> films, List<Map<String, Object>> genresOfFilm) {    /*convert maps of films and genres
+                                                                                                                 to list of films*/
+        List<Film> listOfFilms = new ArrayList<>();
+
+        for (Map<String, Object> map : films) {
+            Film film = new Film();
+            film.setId((Integer) map.get("ID"));
+            film.setName((String) map.get("NAME"));
+            film.setDescription((String) map.get("DESCRIPTION"));
+            film.setReleaseDateFromString((String) map.get("RELEASE_DATE"));
+            if (map.containsKey("MPA_NAME")) {
+                film.getMpa().setName((String) map.get("MPA_NAME"));
+            }
+            if (map.containsKey("MPA_ID")) {
+                film.getMpa().setId((Integer) map.get("MPA_ID"));
+            }
+            film.setDuration((Long) map.get("DURATION"));
+            film.setRate((Integer) map.get("RATE"));
+
+            for (Map<String, Object> genreMap : genresOfFilm) {
+                int genreId = (Integer) genreMap.get("ID");
+                String genreName = (String) genreMap.get("NAME");
+                Genre genre = new Genre(genreId, genreName);
+                film.getGenres().add(genre);
+            }
+            listOfFilms.add(film);
+        }
+        return listOfFilms;
     }
 }
