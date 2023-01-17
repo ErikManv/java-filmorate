@@ -8,8 +8,10 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Data
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class Film {
     private LocalDate releaseDate;
     private long duration;
     private Integer rate;
-    private Set<Genre> genres = new TreeSet<>();
+    private TreeSet<Genre> genres = new TreeSet<>();
     private Mpa mpa = new Mpa();
     private Set<Integer> personsLikedFilm = new HashSet<>();
 

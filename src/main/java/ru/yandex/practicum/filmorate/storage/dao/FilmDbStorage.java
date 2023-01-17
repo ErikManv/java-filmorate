@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -17,10 +19,7 @@ import ru.yandex.practicum.filmorate.storage.rowMappers.FilmRowMapper;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository("FilmDbStorage")
@@ -153,16 +152,20 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-
-        jdbcTemplate.update(SQL_UPDATE_FILM,
-                film.getName(),
-                film.getDescription(),
-                film.getDuration(),
-                film.getReleaseDate(),
-                film.getMpa().getId(),
-                film.getId());
+        try {
+            jdbcTemplate.update(SQL_UPDATE_FILM,
+                    film.getName(),
+                    film.getDescription(),
+                    film.getDuration(),
+                    film.getReleaseDate(),
+                    film.getMpa().getId(),
+                    film.getId());
+        } catch (NullPointerException e) {
+            throw new NullPointerException();
+        }
         jdbcTemplate.update(SQL_DELETE_GENRES_OF_FILM, film.getId());
-        for (Genre genre : film.getGenres()) {
+        NavigableSet<Genre> genres = film.getGenres(); // это сделано потому-что POSTMAN выдавал ошибку
+        for (Genre genre : genres.descendingSet()) {
             try {
                 jdbcTemplate.update(SQL_ADD_GENRES_OF_FILM, film.getId(), genre.getId());
             } catch (DataIntegrityViolationException e) {

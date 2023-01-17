@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.exception.handler;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.ErrorResponse;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import javax.servlet.ServletException;
+import java.sql.SQLException;
 
 
 @ControllerAdvice
@@ -42,13 +44,13 @@ public class Handler {
         );
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-// отлавливаем исключение IllegalArgumentException
-    public ErrorResponse handleNullPointer(final ServletException e) {
-        // возвращаем сообщение об ошибке
-        return new ErrorResponse(
-                "Объект не найден", e.getMessage()
-        );
-    }
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//// отлавливаем исключение IllegalArgumentException
+//    public ErrorResponse handleUpdateError(final InvalidDataAccessApiUsageException e) {
+//        // возвращаем сообщение об ошибке
+//        return new ErrorResponse(
+//                "Произошла непредвиденная ошибка", e.getMessage()
+//        );
+//    }
 }

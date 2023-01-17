@@ -11,8 +11,10 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.rowMappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.servlet.ServletException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -64,9 +66,10 @@ public class UserDbStorage implements UserStorage {
     }
     @Override
     public User updateUser(User user) {
-            jdbcTemplate.update(SQL_UPDATE_USER,
-                    user.getName(), user.getLogin(), user.getEmail(), user.getBirthdayAsString(), user.getId());
-            return user;
+        containsUser(user.getId());
+        jdbcTemplate.update(SQL_UPDATE_USER,
+                user.getName(), user.getLogin(), user.getEmail(), user.getBirthdayAsString(), user.getId());
+        return user;
     }
 
     @Override
