@@ -1,4 +1,3 @@
-/*
 INSERT INTO genre_table (NAME)
 VALUES ('Комедия'),
      ('Драма'),
@@ -15,7 +14,6 @@ VALUES ('G'),
        ('PG-13'),
        ('R'),
        ('NC-17');
-*/
 
 
 
