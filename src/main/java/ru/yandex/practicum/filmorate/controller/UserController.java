@@ -30,17 +30,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user){
-        return userService.createUser(user);
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        return new ResponseEntity<>(userService.createUser(user), HttpStatus.OK);
     }
 
     @PutMapping
     public ResponseEntity<User> updateUser(@RequestBody User user) {
-        try {
-            return new ResponseEntity<>(userService.updateUser(user), HttpStatus.OK);
-        } catch (NotFoundException exception) {
-            return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
-        }
+            return userService.updateUser(user);
     }
 
     @GetMapping("/{id}")

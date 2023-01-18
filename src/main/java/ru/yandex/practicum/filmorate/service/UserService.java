@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -53,12 +55,16 @@ public class UserService {
         return userStorage.getFriendsList(userId);
     }
 
-    public User updateUser(User user){
-        validator(user);
-        containsUser(user.getId());
-        log.info("пользователь {} обновлен", user.getName());
-        userStorage.updateUser(user);
-        return user;
+    public ResponseEntity<User> updateUser(User user){
+        try {
+            validator(user);
+            containsUser(user.getId());
+            log.info("пользователь {} обновлен", user.getName());
+            return new ResponseEntity<>(userStorage.updateUser(user), HttpStatus.OK);
+        }
+        catch (NotFoundException exception) {
+            return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
+        }
     }
 
     public void putFriend(Integer userId, Integer newFriendId) {

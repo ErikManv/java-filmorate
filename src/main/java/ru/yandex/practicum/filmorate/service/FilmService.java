@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -47,12 +49,15 @@ public class FilmService {
         return filmStorage.getFilm(filmId);
     }
 
-    public Film updateFilm(Film film){
-        validator(film);
-        containsFilm(film.getId());
-        log.info("фильм {} обновлен", film.getName());
-        filmStorage.updateFilm(film);
-        return film;
+    public ResponseEntity<Film> updateFilm(Film film){
+        try{
+            validator(film);
+            containsFilm(film.getId());
+            log.info("фильм {} обновлен", film.getName());
+            return new ResponseEntity<>(filmStorage.updateFilm(film), HttpStatus.OK);
+        }catch(NotFoundException exception) {
+            return new ResponseEntity<>(film, HttpStatus.NOT_FOUND);
+        }
     }
 
     public List<Film> topFilms(Integer count){
@@ -101,7 +106,7 @@ public class FilmService {
         }
     }
 
-    public void containsFilm(Integer filmId) {
+    private void containsFilm(Integer filmId) {
         List<Integer> ids = new ArrayList<>();
         for(Film film1: filmStorage.findAll()) {
             ids.add(film1.getId());

@@ -38,15 +38,11 @@ public class FilmController {
 
     @PutMapping
     public ResponseEntity<Film> updateFilm(@RequestBody Film film){
-        try{
-            return new ResponseEntity<>(filmService.updateFilm(film), HttpStatus.OK);
-        }catch (NotFoundException exception) {
-            return new ResponseEntity<>(film, HttpStatus.NOT_FOUND);
-        }
+            return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void putLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
+    public void  putLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
         filmService.putLike(filmId, userId);
     }
 

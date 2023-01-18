@@ -23,7 +23,7 @@ public class GenreService {
     }
 
     public Genre getGenre(int id) {
-        if(id < 0) {
+        if(id <= 0) {
             throw new NullPointerException("Genre with id " + id + " has not been found!");
         }
         return genreDao.getGenre(id);
