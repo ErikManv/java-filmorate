@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -40,7 +39,7 @@ public class FilmDbStorage implements FilmStorage {
     private static final String SQL_PUT_LIKE = "INSERT INTO LIKE_USER_TABLE (FILM_ID, USER_ID)" +
             "VALUES (?,?)";
 
-    private static final String SQL_UPDATE_RATE_OF_FILM = "UPDATE FILM_TABLE SET RATE=?";
+    private static final String SQL_UPDATE_RATE_OF_FILM = "UPDATE FILM_TABLE SET RATE=? WHERE ID=?";
 
     private static final String SQL_GET_RATE_OF_FILM = "SELECT COUNT(FILM_ID) " +
             "FROM LIKE_USER_TABLE WHERE FILM_ID=";
@@ -120,14 +119,14 @@ public class FilmDbStorage implements FilmStorage {
     public void putLike(Integer filmId, Integer userId) {
         jdbcTemplate.update(SQL_PUT_LIKE, filmId, userId);
         int rate = jdbcTemplate.queryForObject(SQL_GET_RATE_OF_FILM + filmId, Integer.class);
-        jdbcTemplate.update(SQL_UPDATE_RATE_OF_FILM, rate);
+        jdbcTemplate.update(SQL_UPDATE_RATE_OF_FILM, rate, filmId);
     }
 
     @Override
     public void deleteLike(Integer filmId, Integer userId) {
         jdbcTemplate.update(SQL_DELETE_LIKE, filmId, userId);
         int rate = jdbcTemplate.queryForObject(SQL_GET_RATE_OF_FILM + filmId, Integer.class);
-        jdbcTemplate.update(SQL_UPDATE_RATE_OF_FILM, rate);
+        jdbcTemplate.update(SQL_UPDATE_RATE_OF_FILM, rate, filmId);
 
     }
     @Override
@@ -135,7 +134,6 @@ public class FilmDbStorage implements FilmStorage {
         List<Map<String, Object>> films = jdbcTemplate.queryForList(SQL_GET_ALL_FILMS_ORDERED_BY_RATE);
         List<Film> listOfFilms = mapsToList(films);
 
-        Collections.reverse(listOfFilms);
         return listOfFilms
                 .stream()
                 .limit(count)
