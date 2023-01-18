@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 import ru.yandex.practicum.filmorate.storage.dao.UserDbStorage;
@@ -20,6 +22,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -28,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class FilmControllerTest {
 
     private final UserDbStorage userService;
-    private final FilmDbStorage filmService;
-    private final FilmController filmController;
+    private final FilmDbStorage filmController;
+    private final FilmService filmService;
 
     private final MpaDao mpaDao;
     @Test
@@ -40,13 +43,26 @@ class FilmControllerTest {
         film.setDuration(180);
         film.setDescription("description");
         film.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film);
+        filmController.addFilm(film);
         Optional<Film> filmOptional = Optional.ofNullable(film);
 
         assertThat(filmOptional)
                 .isPresent().hasValueSatisfying(user1 ->
                         assertThat(film).hasFieldOrPropertyWithValue("id", 1)
                 );
+    }
+
+    @Test
+    public void addFilmErrorTest() {
+        Film film = new Film();
+        film.setName("film name");
+        film.setReleaseDate(LocalDate.of(11, 12,3));
+        film.setDuration(180);
+        film.setDescription("description");
+        film.setMpa(mpaDao.getMpa(1));
+        assertThrows(ValidationException.class, ()->{
+            filmService.addFilm(film);});
+
     }
 
     @Test
@@ -57,7 +73,7 @@ class FilmControllerTest {
         film.setDuration(180);
         film.setDescription("description");
         film.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film);
+        filmController.addFilm(film);
 
         Film film2 = new Film();
         film2.setName("film name new");
@@ -65,9 +81,9 @@ class FilmControllerTest {
         film2.setDuration(180);
         film2.setDescription("description");
         film2.setMpa(mpaDao.getMpa(2));
-        filmService.addFilm(film2);
+        filmController.addFilm(film2);
 
-        assertEquals(2, filmService.findAll().size());
+        assertEquals(2, filmController.findAll().size());
     }
     @Test
     public void updateFilmTest() {
@@ -77,7 +93,7 @@ class FilmControllerTest {
         film.setDuration(180);
         film.setDescription("description");
         film.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film);
+        filmController.addFilm(film);
 
         Film film2 = new Film();
         film2.setId(1);
@@ -87,22 +103,22 @@ class FilmControllerTest {
         film2.setDescription("description");
         film2.setMpa(mpaDao.getMpa(2));
 
-        Optional<Film> filmOptional = Optional.ofNullable(filmService.updateFilm(film2));
+        Optional<Film> filmOptional = Optional.ofNullable(filmController.updateFilm(film2));
 
         assertThat(filmOptional)
                 .isPresent().hasValueSatisfying(user1 ->
-                        assertThat(filmService.getFilm(1)).hasFieldOrPropertyWithValue("name", "film name new"));
+                        assertThat(filmController.getFilm(1)).hasFieldOrPropertyWithValue("name", "film name new"));
     }
 
     @Test
     public void updateFilmErrorResponseStatusTest(){
         Film film = new Film();
         film.setName("film name");
-        film.setReleaseDate(LocalDate.of(1894, 12,3));
+        film.setReleaseDate(LocalDate.of(1898, 12,3));
         film.setDuration(180);
         film.setDescription("description");
         film.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film);
+        filmController.addFilm(film);
 
         Film film2 = new Film();
         film2.setId(5);
@@ -111,11 +127,9 @@ class FilmControllerTest {
         film2.setDuration(180);
         film2.setDescription("description");
         film2.setMpa(mpaDao.getMpa(2));
-        try{
-           assertEquals(404, filmController.updateFilm(film2).getStatusCodeValue());
-        }catch (NotFoundException e){
+        assertEquals(404, filmService.updateFilm(film2).getStatusCodeValue());
         }
-    }
+
     @Test
     public void getFilmTest() {
         Film film = new Film();
@@ -124,15 +138,28 @@ class FilmControllerTest {
         film.setDuration(180);
         film.setDescription("description");
         film.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film);
+        filmController.addFilm(film);
 
         Optional<Film> filmOptional = Optional.ofNullable(film);
 
         assertThat(filmOptional)
                 .isPresent().hasValueSatisfying(user1 ->
-                        assertThat(filmService.getFilm(1)).hasFieldOrPropertyWithValue("name", "film name"));
+                        assertThat(filmController.getFilm(1)).hasFieldOrPropertyWithValue("name", "film name"));
     }
 
+    @Test
+    public void getFilmErrorTest() {
+        Film film = new Film();
+        film.setName("film name");
+        film.setReleaseDate(LocalDate.of(1894, 12,3));
+        film.setDuration(180);
+        film.setDescription("description");
+        film.setMpa(mpaDao.getMpa(1));
+        filmController.addFilm(film);
+
+        assertThrows(NotFoundException.class, ()->{
+            filmService.getFilm(5);});
+    }
     @Test
     public void putLikeDeleteLikeTopFilmMethodsTest() {
         Film film = new Film();
@@ -141,7 +168,7 @@ class FilmControllerTest {
         film.setDuration(180);
         film.setDescription("description");
         film.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film);
+        filmController.addFilm(film);
 
         Film film2 = new Film();
         film2.setName("film name");
@@ -149,7 +176,7 @@ class FilmControllerTest {
         film2.setDuration(180);
         film2.setDescription("description");
         film2.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film2);
+        filmController.addFilm(film2);
 
         Film film3 = new Film();
         film3.setName("film name");
@@ -157,7 +184,7 @@ class FilmControllerTest {
         film3.setDuration(180);
         film3.setDescription("description");
         film3.setMpa(mpaDao.getMpa(1));
-        filmService.addFilm(film3);
+        filmController.addFilm(film3);
 
         User user = new User();
         user.setEmail("garrys2machinima@gmail.com");
@@ -173,14 +200,14 @@ class FilmControllerTest {
         user2.setBirthday(LocalDate.of(2001,2,8));
         userService.createUser(user2);
 
-        filmService.putLike(1, 1);
-        filmService.putLike(1, 2);
-        assertEquals(2, filmService.getFilm(1).getRate());
+        filmController.putLike(1, 1);
+        filmController.putLike(1, 2);
+        assertEquals(2, filmController.getFilm(1).getRate());
 
-        filmService.putLike(2, 1);
-        assertEquals(2, filmService.topFilms(3).get(0).getRate());
+        filmController.putLike(2, 1);
+        assertEquals(2, filmController.topFilms(3).get(0).getRate());
 
-        filmService.deleteLike(1, 1);
-        assertEquals(1, filmService.getFilm(1).getRate());
+        filmController.deleteLike(1, 1);
+        assertEquals(1, filmController.getFilm(1).getRate());
     }
 }
