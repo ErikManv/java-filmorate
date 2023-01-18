@@ -3,10 +3,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import javax.servlet.ServletException;
 import java.util.List;
 
 @RestController
@@ -31,8 +35,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user){
-        return userService.updateUser(user);
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+        try {
+            return new ResponseEntity<>(userService.updateUser(user), HttpStatus.OK);
+        } catch (NotFoundException exception) {
+            return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{id}")

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -60,21 +59,13 @@ public class UserDbStorage implements UserStorage {
     }
     @Override
     public User updateUser(User user) {
-        containsUser(user.getId());
-        jdbcTemplate.update(SQL_UPDATE_USER,
-                user.getName(), user.getLogin(), user.getEmail(), user.getBirthdayAsString(), user.getId());
-        return user;
-    }
-
-    @Override
-    public boolean containsUser(Integer id) {
-        try {
-            jdbcTemplate.queryForObject(SQL_GET_USER, new Object[]{id},
-                    new UserRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-        return true;
+            jdbcTemplate.update(SQL_UPDATE_USER,
+                    user.getName(),
+                    user.getLogin(),
+                    user.getEmail(),
+                    user.getBirthdayAsString(),
+                    user.getId());
+            return user;
     }
 
     @Override
@@ -117,18 +108,18 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> commonFriends(Integer userId, Integer anotherId) {
-        List<Map<String, Object>> allFriendsOfFirstUser = jdbcTemplate
+        List<Map<String, Object>> allFriendsOfUser = jdbcTemplate
                 .queryForList(SQL_GET_ALL_FRIENDS_OF_USER, userId);
 
-        List<Map<String, Object>> allFriendsOfSecondUser = jdbcTemplate
+        List<Map<String, Object>> allFriendsOfAnotherUser = jdbcTemplate
                 .queryForList(SQL_GET_ALL_FRIENDS_OF_USER, anotherId);
 
-        List<User> allFriendsOfFirstUserAsList = UserRowMapper.userMapper(allFriendsOfFirstUser);
-        List<User> allFriendsOfSecondUserAsList = UserRowMapper.userMapper(allFriendsOfSecondUser);
+        List<User> allFriendsOfUserAsList = UserRowMapper.userMapper(allFriendsOfUser);
+        List<User> allFriendsOfAnotherUserAsList = UserRowMapper.userMapper(allFriendsOfAnotherUser);
 
-        return allFriendsOfFirstUserAsList
+        return allFriendsOfUserAsList
                 .stream()
-                .filter(allFriendsOfSecondUserAsList::contains)
+                .filter(allFriendsOfAnotherUserAsList::contains)
                 .collect(Collectors.toList());
     }
 }

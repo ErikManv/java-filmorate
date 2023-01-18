@@ -2,23 +2,16 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.rowMappers.FilmRowMapper;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,8 +25,6 @@ public class FilmDbStorage implements FilmStorage {
             "ON FILM_TABLE.MPA = MPA_TABLE.MPA_ID WHERE FILM_TABLE.ID=?";
 
     private static final String SQL_ADD_GENRES_OF_FILM = "INSERT INTO GENRE_FILM_TABLE(FILM_ID, GENRE_ID) VALUES (?,?) ";
-
-    private static final String SQL_CHECK_FILM_IF_EXISTS = "SELECT * FROM FILM_TABLE WHERE ID=? ";
 
     private static final String SQL_GET_ALL_FILMS = "SELECT * FROM FILM_TABLE LEFT JOIN MPA_TABLE " +
             "ON FILM_TABLE.MPA = MPA_TABLE.MPA_ID";
@@ -95,64 +86,21 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public boolean containsFilm(Integer filmId) {
-        try {
-            jdbcTemplate.queryForObject(SQL_CHECK_FILM_IF_EXISTS, new Object[]{filmId},
-                    new FilmRowMapper());
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public List<Film> findAll() {
         List<Map<String, Object>> films = jdbcTemplate.queryForList(SQL_GET_ALL_FILMS);
 
-        List<Film> listOfFilms = new ArrayList<>();
-
-        for (Map<String, Object> map : films) {
-            Film film = new Film();
-            film.setId((Integer) map.get("ID"));
-            film.setName((String) map.get("NAME"));
-            film.setDescription((String) map.get("DESCRIPTION"));
-            film.setReleaseDateFromString((String) map.get("RELEASE_DATE"));
-            if(map.containsKey("MPA_NAME")) {
-                film.getMpa().setName((String) map.get("MPA_NAME"));
-            }
-            if(map.containsKey("MPA_ID")) {
-                film.getMpa().setId((Integer) map.get("MPA_ID"));
-            }
-            film.setDuration((Long)map.get("DURATION"));
-            film.setRate((Integer)map.get("RATE"));
-
-            List<Map<String, Object>> genresOfFilm = jdbcTemplate.queryForList(SQL_GET_GENRES_OF_FILM, map.get("ID"));
-
-            for (Map<String, Object> genreMap : genresOfFilm) {
-                System.out.println(genreMap.keySet());
-                System.out.println(genreMap.values());
-
-                int genreId = (Integer) genreMap.get("ID");
-                String genreName = (String) genreMap.get("NAME");
-                Genre genre = new Genre(genreId, genreName);
-                film.getGenres().add(genre);
-            }
-            listOfFilms.add(film);
-        }
-        return listOfFilms;
+        return mapsToList(films);
     }
 
     @Override
     public Film getFilm(Integer id) {
 
         List<Map<String, Object>> films = jdbcTemplate.queryForList(SQL_GET_FILM, id);
-        List<Map<String, Object>> genresOfFilm = jdbcTemplate.queryForList(SQL_GET_GENRES_OF_FILM, id);
-        return mapsToList(films, genresOfFilm).get(0);
+        return mapsToList(films).get(0);
     }
 
     @Override
     public Film updateFilm(Film film) {
-        try {
             jdbcTemplate.update(SQL_UPDATE_FILM,
                     film.getName(),
                     film.getDescription(),
@@ -160,17 +108,10 @@ public class FilmDbStorage implements FilmStorage {
                     film.getReleaseDate(),
                     film.getMpa().getId(),
                     film.getId());
-        } catch (NullPointerException e) {
-            throw new NullPointerException();
-        }
         jdbcTemplate.update(SQL_DELETE_GENRES_OF_FILM, film.getId());
         NavigableSet<Genre> genres = film.getGenres(); // это сделано потому-что POSTMAN выдавал ошибку
         for (Genre genre : genres.descendingSet()) {
-            try {
                 jdbcTemplate.update(SQL_ADD_GENRES_OF_FILM, film.getId(), genre.getId());
-            } catch (DataIntegrityViolationException e) {
-
-            }
         }
         return film;
     }
@@ -192,37 +133,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> topFilms(Integer count) {
         List<Map<String, Object>> films = jdbcTemplate.queryForList(SQL_GET_ALL_FILMS_ORDERED_BY_RATE);
-
-        List<Film> listOfFilms = new ArrayList<>();
-
-        for (Map<String, Object> map : films) {
-            Film film = new Film();
-            film.setId((Integer) map.get("ID"));
-            film.setName((String) map.get("NAME"));
-            film.setDescription((String) map.get("DESCRIPTION"));
-            film.setReleaseDateFromString((String) map.get("RELEASE_DATE"));
-            if(map.containsKey("MPA_NAME")) {
-                film.getMpa().setName((String) map.get("MPA_NAME"));
-            }
-            if(map.containsKey("MPA_ID")) {
-                film.getMpa().setId((Integer) map.get("MPA_ID"));
-            }
-            film.setDuration((Long)map.get("DURATION"));
-            film.setRate((Integer)map.get("RATE"));
-
-            List<Map<String, Object>> genresOfFilm = jdbcTemplate.queryForList(SQL_GET_GENRES_OF_FILM, map.get("ID"));
-
-            for (Map<String, Object> genreMap : genresOfFilm) {
-                System.out.println(genreMap.keySet());
-                System.out.println(genreMap.values());
-
-                int genreId = (Integer) genreMap.get("ID");
-                String genreName = (String) genreMap.get("NAME");
-                Genre genre = new Genre(genreId, genreName);
-                film.getGenres().add(genre);
-            }
-            listOfFilms.add(film);
-        }
+        List<Film> listOfFilms = mapsToList(films);
 
         Collections.reverse(listOfFilms);
         return listOfFilms
@@ -231,7 +142,7 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
-    private List<Film> mapsToList (List<Map<String, Object>> films, List<Map<String, Object>> genresOfFilm) {    /*convert maps of films and genres
+    private List<Film> mapsToList (List<Map<String, Object>> films) {    /*convert maps of films and genres
                                                                                                                  to list of films*/
         List<Film> listOfFilms = new ArrayList<>();
 
@@ -249,7 +160,7 @@ public class FilmDbStorage implements FilmStorage {
             }
             film.setDuration((Long) map.get("DURATION"));
             film.setRate((Integer) map.get("RATE"));
-
+            List<Map<String, Object>> genresOfFilm = jdbcTemplate.queryForList(SQL_GET_GENRES_OF_FILM, map.get("ID"));
             for (Map<String, Object> genreMap : genresOfFilm) {
                 int genreId = (Integer) genreMap.get("ID");
                 String genreName = (String) genreMap.get("NAME");
@@ -260,4 +171,5 @@ public class FilmDbStorage implements FilmStorage {
         }
         return listOfFilms;
     }
+
 }

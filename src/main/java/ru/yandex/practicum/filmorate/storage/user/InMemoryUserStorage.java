@@ -34,10 +34,10 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    @Override
-    public boolean containsUser(Integer userId) {
-        return users.containsKey(userId);
-    }
+//    @Override
+//    public boolean containsUser(Integer userId) {
+//        return users.containsKey(userId);
+//    }
 
     @Override
     public User updateUser(User user){

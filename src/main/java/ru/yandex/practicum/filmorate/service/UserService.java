@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,7 +28,6 @@ public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     public List<User> findAll(){
-        System.out.println(userStorage.findAll());
         return userStorage.findAll();
     }
 
@@ -42,64 +43,46 @@ public class UserService {
 
     public User getUser(Integer userId) {
         idValidator(userId);
-        if(userStorage.containsUser(userId)){
-            return userStorage.getUser(userId);
-        }else{
-            log.error("такого id не существует");
-            throw new NullPointerException("такого id нет");
-        }
+        containsUser(userId);
+        return userStorage.getUser(userId);
     }
 
     public List<User> getFriendsList(Integer userId) {
         idValidator(userId);
-        if(userStorage.containsUser(userId)){
-            return userStorage.getFriendsList(userId);
-        }else{
-            log.error("такого id не существует");
-            throw new NullPointerException("такого id нет");
-        }
+        containsUser(userId);
+        return userStorage.getFriendsList(userId);
     }
 
     public User updateUser(User user){
         validator(user);
-        if(userStorage.containsUser(user.getId())){
-            log.info("пользователь {} обновлен", user.getName());
-            userStorage.updateUser(user);
-        }else{
-            log.error("такого id не существует");
-            throw new NullPointerException("такого id нет");
-        }
+        containsUser(user.getId());
+        log.info("пользователь {} обновлен", user.getName());
+        userStorage.updateUser(user);
         return user;
     }
 
     public void putFriend(Integer userId, Integer newFriendId) {
         idValidator(userId);
         idValidator(newFriendId);
-        if(userStorage.containsUser(userId) && userStorage.containsUser(newFriendId)) {
-            userStorage.putFriend(userId, newFriendId);
-        }else {
-            throw new NullPointerException("Пользователя с таким id нет");
-        }
+        containsUser(userId);
+        containsUser(newFriendId);
+        userStorage.putFriend(userId, newFriendId);
     }
 
     public void deleteFriend(Integer userId, Integer targetFriendId) {
         idValidator(userId);
         idValidator(targetFriendId);
-        if(userStorage.containsUser(userId) && userStorage.containsUser(targetFriendId)) {
-            userStorage.deleteFriend(userId, targetFriendId);
-        }else {
-            throw new NullPointerException("Пользователя с таким id нет");
-        }
+        containsUser(userId);
+        containsUser(targetFriendId);
+        userStorage.deleteFriend(userId, targetFriendId);
     }
 
     public List<User> commonFriends(Integer fUserId, Integer sUserId) {
         idValidator(fUserId);
         idValidator(sUserId);
-        if(userStorage.containsUser(fUserId) && userStorage.containsUser(sUserId)) {
-            return userStorage.commonFriends(fUserId, sUserId);
-        }else {
-            throw new NullPointerException("Пользователя с таким id нет");
-        }
+        containsUser(fUserId);
+        containsUser(sUserId);
+        return userStorage.commonFriends(fUserId, sUserId);
     }
 
     private void validator(User user) {
@@ -121,6 +104,16 @@ public class UserService {
         if(id < 1) {
             log.error("неверный id");
             throw new NullPointerException("id не может быть пустым или отрицательным");
+        }
+    }
+
+    public void containsUser(Integer userId) {
+        List<Integer> ids = new ArrayList<>();
+        for(User user1: userStorage.findAll()) {
+            ids.add(user1.getId());
+        }
+        if(!ids.contains(userId)) {
+            throw new NotFoundException("не найдено");
         }
     }
 }

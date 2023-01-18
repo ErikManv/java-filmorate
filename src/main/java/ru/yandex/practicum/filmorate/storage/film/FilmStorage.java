@@ -9,8 +9,6 @@ public interface FilmStorage {
      List<Film> findAll();
 
      Film addFilm(Film film);
-
-     boolean containsFilm(Integer filmId);
      
      Film getFilm(Integer filmId);
 

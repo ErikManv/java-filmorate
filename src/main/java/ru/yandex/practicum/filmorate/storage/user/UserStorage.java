@@ -11,8 +11,6 @@ public interface UserStorage {
 
     User createUser(User user);
 
-    boolean containsUser(Integer userId);
-
     User updateUser(User user);
 
     User getUser(Integer userId);

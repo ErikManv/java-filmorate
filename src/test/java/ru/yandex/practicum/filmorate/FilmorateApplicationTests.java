@@ -18,6 +18,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -56,7 +57,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void updateUserTest() {
+    public void updateUserTest() throws SQLException {
         User user = new User();
         user.setId(1);
         user.setEmail("garrys2machinima@gmail.com");
