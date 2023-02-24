@@ -1,7 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -9,9 +13,13 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/films")
-@RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public List<Film> findAll(){
@@ -29,12 +37,12 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film){
-        return filmService.updateFilm(film);
+    public ResponseEntity<Film> updateFilm(@RequestBody Film film){
+            return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void putLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
+    public void  putLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
         filmService.putLike(filmId, userId);
     }
 

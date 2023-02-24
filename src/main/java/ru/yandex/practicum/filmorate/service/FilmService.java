@@ -4,26 +4,30 @@ package ru.yandex.practicum.filmorate.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class FilmService {
 
     private FilmStorage filmStorage;
-    private UserStorage userStorage;
+    private UserService userService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("FilmDbStorage")FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+        this.userService = userService;
     }
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
@@ -40,25 +44,19 @@ public class FilmService {
     
     public Film getFilm(Integer filmId) {
         idValidator(filmId);
-        if(filmStorage.containsFilm(filmId)){
-            return filmStorage.getFilm(filmId);
-        }
-        else{
-            throw new NullPointerException("такого id нет");
-        }
+        containsFilm(filmId);
+        return filmStorage.getFilm(filmId);
     }
 
-    public Film updateFilm(Film film){
-        validator(film);
-        if(filmStorage.containsFilm(film.getId())){
+    public ResponseEntity<Film> updateFilm(Film film){
+        try{
+            validator(film);
+            containsFilm(film.getId());
             log.info("фильм {} обновлен", film.getName());
-            filmStorage.updateFilm(film);
+            return new ResponseEntity<>(filmStorage.updateFilm(film), HttpStatus.OK);
+        }catch(NotFoundException exception) {
+            return new ResponseEntity<>(film, HttpStatus.NOT_FOUND);
         }
-        else{
-            log.error("NOT SUCH FILM TO UPDATE");
-            throw new NullPointerException("такого id нет");
-        }
-        return film;
     }
 
     public List<Film> topFilms(Integer count){
@@ -68,21 +66,17 @@ public class FilmService {
 
     public void putLike(Integer filmId, Integer userId){
         idValidator(filmId);
-        if(userStorage.containsUser(userId)) {
-            filmStorage.putLike(filmId, userId);
-        } else {
-            throw new NullPointerException("Пользователя с таким id нет");
-        }
+        containsFilm(filmId);
+        userService.containsUser(userId);
+        filmStorage.putLike(filmId, userId);
     }
 
 
     public void deleteLike(Integer filmId, Integer userId) {
         idValidator(filmId);
-        if(userStorage.containsUser(userId)) {
-            filmStorage.deleteLike(filmId, userId);
-        } else {
-            throw new NullPointerException("Пользователя с таким id нет");
-        }
+        containsFilm(filmId);
+        userService.containsUser(userId);
+        filmStorage.deleteLike(filmId, userId);
     }
 
     private void validator(Film film){
@@ -111,4 +105,13 @@ public class FilmService {
         }
     }
 
+    private void containsFilm(Integer filmId) {
+        List<Integer> ids = new ArrayList<>();
+        for(Film film1: filmStorage.findAll()) {
+            ids.add(film1.getId());
+        }
+        if(!ids.contains(filmId)) {
+            throw new NotFoundException("не найдено");
+        }
+    }
 }

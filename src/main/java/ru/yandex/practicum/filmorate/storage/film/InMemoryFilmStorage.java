@@ -33,11 +33,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public boolean containsFilm(Integer filmId) {
-        return films.containsKey(filmId);
-    }
-
-    @Override
     public Film getFilm(Integer filmId) {
         return films.get(filmId);
     }

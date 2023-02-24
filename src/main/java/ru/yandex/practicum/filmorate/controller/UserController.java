@@ -2,18 +2,27 @@ package ru.yandex.practicum.filmorate.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import javax.servlet.ServletException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     
     @GetMapping
     public List<User> findAll(){
@@ -21,13 +30,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user){
-        return userService.createUser(user);
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        return new ResponseEntity<>(userService.createUser(user), HttpStatus.OK);
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user){
-        return userService.updateUser(user);
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+            return userService.updateUser(user);
     }
 
     @GetMapping("/{id}")
